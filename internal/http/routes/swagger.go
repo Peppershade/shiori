@@ -7,7 +7,7 @@ import (
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
-	_ "github.com/go-shiori/shiori/docs/swagger"
+	//_ "github.com/go-shiori/shiori/docs/swagger"
 )
 
 type SwaggerAPIRoutes struct {
