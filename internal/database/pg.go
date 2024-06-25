@@ -28,7 +28,7 @@ var postgresMigrations = []migration{
 		defer tx.Rollback()
 
 		_, err = tx.Exec(`ALTER TABLE bookmark ADD COLUMN has_content BOOLEAN DEFAULT FALSE NOT NULL`)
-		if strings.Contains(err.Error(), `column "has_content" of relation "bookmark" already exists`) {
+		if err != nil && strings.Contains(err.Error(), `column "has_content" of relation "bookmark" already exists`) {
 			tx.Rollback()
 		} else if err != nil {
 			return fmt.Errorf("failed to add has_content column to bookmark table: %w", err)
@@ -45,7 +45,7 @@ var postgresMigrations = []migration{
 		defer tx.Rollback()
 
 		_, err = tx.Exec(`ALTER TABLE account ADD COLUMN config JSONB NOT NULL DEFAULT '{}'`)
-		if strings.Contains(err.Error(), `column "config" of relation "account" already exists`) {
+		if err != nil && strings.Contains(err.Error(), `column "config" of relation "account" already exists`) {
 			tx.Rollback()
 		} else if err != nil {
 			return fmt.Errorf("failed to add config column to account table: %w", err)
@@ -76,12 +76,12 @@ func OpenPGDatabase(ctx context.Context, connString string) (pgDB *PGDatabase, e
 	db.SetMaxOpenConns(100)
 	db.SetConnMaxLifetime(time.Second)
 
-	pgDB = &PGDatabase{dbbase: dbbase{*db}}
+	pgDB = &PGDatabase{dbbase: dbbase{db}}
 	return pgDB, err
 }
 
 // DBX returns the underlying sqlx.DB object
-func (db *PGDatabase) DBx() sqlx.DB {
+func (db *PGDatabase) DBx() *sqlx.DB {
 	return db.DB
 }
 

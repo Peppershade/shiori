@@ -32,7 +32,7 @@ var mysqlMigrations = []migration{
 		defer tx.Rollback()
 
 		_, err = tx.Exec(`ALTER TABLE bookmark ADD COLUMN has_content BOOLEAN DEFAULT 0`)
-		if strings.Contains(err.Error(), `Duplicate column name`) {
+		if err != nil && strings.Contains(err.Error(), `Duplicate column name`) {
 			tx.Rollback()
 		} else if err != nil {
 			return fmt.Errorf("failed to add has_content column to bookmark table: %w", err)
@@ -49,7 +49,7 @@ var mysqlMigrations = []migration{
 		defer tx.Rollback()
 
 		_, err = tx.Exec(`ALTER TABLE account ADD COLUMN config JSON  NOT NULL DEFAULT '{}'`)
-		if strings.Contains(err.Error(), `Duplicate column name`) {
+		if err != nil && strings.Contains(err.Error(), `Duplicate column name`) {
 			tx.Rollback()
 		} else if err != nil {
 			return fmt.Errorf("failed to add config column to account table: %w", err)
@@ -80,12 +80,12 @@ func OpenMySQLDatabase(ctx context.Context, connString string) (mysqlDB *MySQLDa
 	db.SetMaxOpenConns(100)
 	db.SetConnMaxLifetime(time.Second) // in case mysql client has longer timeout (driver issue #674)
 
-	mysqlDB = &MySQLDatabase{dbbase: dbbase{*db}}
+	mysqlDB = &MySQLDatabase{dbbase: dbbase{db}}
 	return mysqlDB, err
 }
 
 // DBX returns the underlying sqlx.DB object
-func (db *MySQLDatabase) DBx() sqlx.DB {
+func (db *MySQLDatabase) DBx() *sqlx.DB {
 	return db.DB
 }
 
